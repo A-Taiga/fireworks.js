@@ -47,8 +47,9 @@ var colors = ['red','green','blue','yellow','orange','magenta','white'];
 maxLimit = 5,
 tick = 0,
 
-autoTimerTotal = 10,
+autoTimerTotal = 20,
 autoTimer = 0,
+
 
 
 canvas.addEventListener('mousemove', e => {
@@ -63,6 +64,21 @@ canvas.addEventListener('mouseup', e => {
     mouseDown = false;
 });
 
+
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    var touch = e.touches[0] || e.changedTouches[0];
+    mX_pos = touch.clientX;
+    mY_pos = touch.clientY;
+    
+    console.log(mX_pos,mY_pos);
+});
+canvas.addEventListener('touchstart', e => {
+    mouseDown = true;
+});
+canvas.addEventListener('touchend', e => {
+    mouseDown = false;
+});
 
 
 function random(min,max) {
@@ -230,7 +246,7 @@ function main() {
 
     if( tick >= maxLimit ) {
 		if( mouseDown ) {
-			fireworks.push( new Firework( cw / 2, ch, mX_pos, mY_pos));
+			fireworks.push( new Firework(  mX_pos+random(-100,100), ch, mX_pos, mY_pos));
 			tick = 0;
 		}
 	} else {
