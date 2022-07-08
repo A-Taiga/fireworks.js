@@ -26,7 +26,7 @@ var fireworks = [];
 var maxFireRate = 5;
 var fireRate = 0;
 
-var maxAutoRate = 20;
+var maxAutoRate = 30;
 var autoFireRate = 0;
 
 var colors = ['red','green','blue','yellow','orange','purple','magenta','cyan','white'];
@@ -167,8 +167,8 @@ class Firework {
         }
 
         this.angle = Math.atan2( ty - sy, tx - sx );
-        this.speed = 2;
-        this.acceleration = 1.05;
+        this.speed = 1;
+        this.acceleration = .5;
         this.mixedHue = mixedHue;
         this.h = h;
     
@@ -188,7 +188,7 @@ class Firework {
         this.distance_tranvled = calc_distance(this.sx, this.sy, this.x + vx, this.y + vy);
         if(this.distance_tranvled >= this.target_distance) {
             fireworks.splice(i,1);
-            create_particles(this.tx,this.ty,100,this.h,this.mixedHue);
+            create_particles(this.tx,this.ty,rand(50,200),this.h,this.mixedHue);
         } else {
             this.x += vx;
             this.y += vy;
