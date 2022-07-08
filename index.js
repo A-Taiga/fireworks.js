@@ -1,25 +1,48 @@
 //canvas setup
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
-var width = window.innerWidth;
-var height = window.innerHeight;
-var scale = window.devicePixelRatio; 
-canvas.style.cursor = "crosshair"; 
-canvas.style.border = '1px solid black';
-canvas.style.width = width + "px";
-canvas.style.height = height + "px";
-canvas.width = Math.floor(width* scale);
-canvas.height = Math.floor(height * scale);
-ctx.scale(scale, scale);
-document.body.append(canvas);
+function setup_canvas() {
+    
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    var scale = window.devicePixelRatio; 
+    canvas.style.cursor = "crosshair"; 
+    canvas.style.border = '1px solid black';
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    canvas.width = Math.floor(width* scale);
+    canvas.height = Math.floor(height * scale);
+    ctx.scale(scale, scale);
+    document.body.append(canvas);
+}
+setup_canvas();
+
+
+
+
+addEventListener('resize', (event) => {
+    setup_canvas();
+    cw = canvas.clientWidth;
+    ch = canvas.clientHeight;
+});
+
 ////////////////////////////////
-let cw = canvas.clientWidth;
-let ch = canvas.clientHeight;
-let particles = [];
-let fireworks = [];
-let mouseDown = false;
-let mX_pos = 0;
-let mY_pos = 0;
+var cw = canvas.clientWidth;
+var ch = canvas.clientHeight;
+var particles = [];
+var fireworks = [];
+var mouseDown = false;
+var mX_pos = 0;
+var mY_pos = 0;
+var h = 0;
+
+
+var colors = ['red','green','blue','yellow','orange','magenta','white'];
+
+
+
+
+
 
 maxLimit = 5,
 tick = 0,
@@ -41,11 +64,13 @@ canvas.addEventListener('mouseup', e => {
 });
 
 
+
 function random(min,max) {
     return Math.random() * (max-min) + min;
 }
 ////////////////////////////////////////////////////////////////// PARTICLE FUNCTION
-function Particle(x,y) {  
+function Particle(x,y,color) {  
+    
     this.x = x;
     this.y = y;
 
@@ -55,17 +80,16 @@ function Particle(x,y) {
         this.coords.push([this.x,this.y]);
     }
     this.angle = random(0, Math.PI * 2);
-    this.speed = random(1,9);
+    this.speed = random(1,10);
     this.friction = 0.95;
     this.gravity = 1;
 
     this.alpha = 1;
-    this.decay = random(0.015,0.03);
-
-    this.hue = random(0,300);
-
+    this.decay = random( 0.015, 0.03 );
+   
+    
 }
-Particle.prototype.update = function (i) { //////////////// UPDATE PARTICLE
+Particle.prototype.update = function (i) { //////////////// UPDATE PARTICLE FUNCTION
     this.coords.pop();
     this.coords.unshift([this.x,this.y]);
 
@@ -79,12 +103,23 @@ Particle.prototype.update = function (i) { //////////////// UPDATE PARTICLE
     }
 
 }
-Particle.prototype.draw = function () { //////////////// DRAW PARTICLE
+Particle.prototype.draw = function () { //////////////// DRAW PARTICLE FUNCTION
     ctx.beginPath();
     ctx.moveTo(this.coords[this.coords_size-1][0],
                 this.coords[this.coords_size-1][1]);
     ctx.lineTo(this.x,this.y);
-    ctx.strokeStyle = `hsla(${this.hue},100%,50%,${this.alpha})`;
+    ctx.strokeStyle = colors[Math.floor(random(0,colors.length-1))];
+    
+
+
+
+
+    
+   
+
+
+    ctx.lineWidth = '3';
+    ctx.lineCap = 'round';
     ctx.stroke();
 }
 
@@ -101,9 +136,9 @@ function calc_distance(x1,y1,x2,y2) {
     return Math.sqrt(d1+d2);
 }
 
-
-function Firework(sx,sy,tx,ty) {
-
+////////////////////////////////////////////////////////////////// FIREWORK FUNCTION
+function Firework(sx,sy,tx,ty,color) {
+   
     this.x = sx;
     this.y = sy;
 
@@ -117,7 +152,7 @@ function Firework(sx,sy,tx,ty) {
     this.distance_travled = 0;
 
     this.coords = [];
-    this.coords_size = 1;
+    this.coords_size = 3;
     for(let i = 0; i < this.coords_size; i++) {
         this.coords.push([this.x, this.y]);
     }
@@ -127,9 +162,13 @@ function Firework(sx,sy,tx,ty) {
     this.acceleration = 1.05;
     this.angle = Math.atan2(ty-sy, tx-sx);
     this.hue = random(100,300);
+    
+    
+   
 
 
 }
+////////////////////////////////////////////////////////////////// UPDATE FIREWORK FUNCTION
 Firework.prototype.update = function (i) {
     this.coords.pop();
     this.coords.unshift([this.x, this.y]);
@@ -140,7 +179,7 @@ Firework.prototype.update = function (i) {
     this.distance_travled = calc_distance(this.sx, this.sy, this.x + vx, this.y + vy);
 
     if(this.distance_travled >= this.target_distance) {
-        create_particles(this.tx,this.ty,100);
+        create_particles(this.tx,this.ty,100,this.co);
         fireworks.splice(i,1);
        
     } else {
@@ -149,21 +188,15 @@ Firework.prototype.update = function (i) {
     }
 
 }
+////////////////////////////////////////////////////////////////// DRAW FIREWORK FUNCTION
 Firework.prototype.draw = function () { 
     ctx.beginPath();
     ctx.moveTo(this.coords[this.coords_size-1][0],
                 this.coords[this.coords_size-1][1]);
     ctx.lineTo(this.x, this.y);
-    ctx.strokeStyle =  ctx.strokeStyle = `hsl(${this.hue},100%,50%)`;
+    ctx.strokeStyle =  colors[Math.floor(random(0,colors.length-1))];
     ctx.stroke();
     
-}
-
-function create_firework(sx,sy,tx,ty,count) {
-    for(let i = 0; i < count; i++) {
-        fireworks.push(new Firework(sx,sy,tx,ty));
-       
-    }
 }
 
 
@@ -171,8 +204,6 @@ function main() {
     requestAnimationFrame(main);
     ctx.clearRect(0,0,cw,ch);
     
-
-
 
     
     for(let i = 0; i < fireworks.length; i++) {
@@ -186,19 +217,20 @@ function main() {
 
 
     if( autoTimer >= autoTimerTotal ) {
+        
 		if( !mouseDown ) {
-			// start the firework at the bottom middle of the screen, then set the random target coordinates, the random y coordinates will be set within the range of the top half of the screen
-			fireworks.push( new Firework( cw / 2, ch, random( 0, cw ), random( 0, ch / 2 ) ) );
+            let xpos = random(100,cw-100);
+			fireworks.push( new Firework( xpos, ch, xpos, random( 0, ch / 2 )));
 			autoTimer = 0;
 		}
 	} else {
+        
 		autoTimer++;
 	}
 
     if( tick >= maxLimit ) {
 		if( mouseDown ) {
-			// start the firework at the bottom middle of the screen, then set the current mouse coordinates as the target
-			fireworks.push( new Firework( cw / 2, ch, mX_pos, mY_pos ) );
+			fireworks.push( new Firework( cw / 2, ch, mX_pos, mY_pos));
 			tick = 0;
 		}
 	} else {
